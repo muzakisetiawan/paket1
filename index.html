@@ -550,6 +550,11 @@
     .tech-card i { font-size: 32px; line-height: 1; }
     .tech-card img { width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(255,255,255,0.1)); transition: filter 0.3s; }
     .tech-card:hover img { filter: drop-shadow(0 0 10px rgba(0,229,255,0.4)); }
+    /* Zabbix SVG needs invert on dark bg */
+    .tech-card img[src*="zabbix"] { filter: invert(1) drop-shadow(0 0 6px rgba(255,255,255,0.1)); }
+    .tech-card:hover img[src*="zabbix"] { filter: invert(1) drop-shadow(0 0 10px rgba(0,229,255,0.4)); }
+    /* SSH logo (white text PNG) - boost brightness */
+    .tech-card img[src*="OpenSSH"] { filter: brightness(1.4) drop-shadow(0 0 6px rgba(255,255,255,0.1)); }
     .tech-card span { font-size: 10px; color: var(--muted); letter-spacing: 0.5px; text-align: center; }
 
     /* tech icon colors */
@@ -588,11 +593,11 @@
 <!-- SIDEBAR TOC -->
 <nav id="toc">
   <div class="toc-title">// navigasi</div>
-  <a class="toc-item" href="#ssh"><img src="https://cdn.simpleicons.org/openssh/5a6072" alt="" class="toc-img"/>1. SSH</a>
-  <a class="toc-item" href="#dns"><img src="https://cdn.simpleicons.org/isc/5a6072" alt="" class="toc-img"/>2. DNS (BIND9)</a>
+  <a class="toc-item" href="#ssh"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/OpenSSH_logo.png/240px-OpenSSH_logo.png" alt="" class="toc-img"/>1. SSH</a>
+  <a class="toc-item" href="#dns"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/BIND_Logo.png/240px-BIND_Logo.png" alt="" class="toc-img"/>2. DNS (BIND9)</a>
   <a class="toc-item" href="#apache"><img src="https://cdn.simpleicons.org/apache/5a6072" alt="" class="toc-img"/>3. Apache2</a>
   <a class="toc-item" href="#https"><img src="https://cdn.simpleicons.org/letsencrypt/5a6072" alt="" class="toc-img"/>4. HTTPS SSL</a>
-  <a class="toc-item" href="#zabbix"><img src="https://cdn.simpleicons.org/zabbix/5a6072" alt="" class="toc-img"/>5. Zabbix</a>
+  <a class="toc-item" href="#zabbix"><img src="https://www.vectorlogo.zone/logos/zabbix/zabbix-icon.svg" alt="" class="toc-img"/>5. Zabbix</a>
   <a class="toc-item" href="#firewall"><img src="https://cdn.simpleicons.org/mikrotik/5a6072" alt="" class="toc-img"/>6. Firewall MikroTik</a>
   <a class="toc-item" href="#netplan"><img src="https://cdn.simpleicons.org/ubuntu/5a6072" alt="" class="toc-img"/>7. Netplan (Opsional)</a>
 </nav>
@@ -632,7 +637,7 @@
       <span>Apache2</span>
     </div>
     <div class="tech-card" data-delay="160">
-      <img src="https://cdn.simpleicons.org/isc/00e5ff" alt="BIND9"/>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/BIND_Logo.png/240px-BIND_Logo.png" alt="BIND9"/>
       <span>BIND9 DNS</span>
     </div>
     <div class="tech-card" data-delay="240">
@@ -640,7 +645,7 @@
       <span>SSL/HTTPS</span>
     </div>
     <div class="tech-card" data-delay="320">
-      <img src="https://cdn.simpleicons.org/zabbix/D40000" alt="Zabbix"/>
+      <img src="https://www.vectorlogo.zone/logos/zabbix/zabbix-icon.svg" alt="Zabbix"/>
       <span>Zabbix</span>
     </div>
     <div class="tech-card" data-delay="400">
@@ -663,7 +668,7 @@
 
   <!-- ========== SSH ========== -->
   <div id="ssh" class="section-heading">
-    <div class="section-num" style="background:linear-gradient(135deg,#1a6e3a,#00e676)"><img src="https://cdn.simpleicons.org/openssh/ffffff" alt="SSH"/></div>
+    <div class="section-num" style="background:linear-gradient(135deg,#1a6e3a,#00e676)"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/OpenSSH_logo.png/240px-OpenSSH_logo.png" alt="SSH"/></div>
     <div class="section-info">
       <h2>Penginstalan SSH</h2>
       <p>Remote access dari Windows ke server</p>
@@ -705,7 +710,7 @@ sudo apt install ssh -y</code></pre>
 
   <!-- ========== DNS ========== -->
   <div id="dns" class="section-heading">
-    <div class="section-num" style="background:linear-gradient(135deg,#005fa3,#00e5ff)"><img src="https://cdn.simpleicons.org/isc/ffffff" alt="BIND9"/></div>
+    <div class="section-num" style="background:linear-gradient(135deg,#005fa3,#00e5ff)"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/BIND_Logo.png/240px-BIND_Logo.png" alt="BIND9"/></div>
     <div class="section-info">
       <h2>DNS Server (BIND9)</h2>
       <p>Domain: lab-smk.xyz → 192.168.30.10</p>
@@ -961,7 +966,7 @@ https://192.168.30.10</code></pre>
 
   <!-- ========== ZABBIX ========== -->
   <div id="zabbix" class="section-heading">
-    <div class="section-num" style="background:linear-gradient(135deg,#7a0000,#d40000)"><img src="https://cdn.simpleicons.org/zabbix/ffffff" alt="Zabbix"/></div>
+    <div class="section-num" style="background:linear-gradient(135deg,#7a0000,#d40000)"><img src="https://www.vectorlogo.zone/logos/zabbix/zabbix-icon.svg" alt="Zabbix"/></div>
     <div class="section-info">
       <h2>Zabbix Server</h2>
       <p>Monitoring server — Versi aman & pasti jalan</p>
