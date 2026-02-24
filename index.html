@@ -1,193 +1,1353 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Tutorial Membuat CBT Sekolah</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tutorial Ubuntu Server — Muzaki Setiawan</title>
+  <meta property="og:title" content="Tutorial Ubuntu Server Paket 1"/>
+  <meta property="og:description" content="Ini Website Muzaki Setiawan"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://muzaki-setiawan.github.io/"/>
+  <link rel="icon" href="favicon.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 
-<style>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body{
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    margin:0;
-    padding:0;
-}
+    :root {
+      --bg: #050810;
+      --surface: #0d1117;
+      --surface2: #111827;
+      --accent: #00e5ff;
+      --accent2: #ff3cac;
+      --accent3: #7b2fff;
+      --green: #00e676;
+      --yellow: #ffd600;
+      --text: #e8eaf0;
+      --muted: #5a6072;
+      --border: rgba(255,255,255,0.06);
+      --glow: 0 0 30px rgba(0,229,255,0.12);
+    }
 
-.header{
-    background:#2c3e50;
-    color:white;
-    padding:20px;
-    text-align:center;
-}
+    html { scroll-behavior: smooth; }
 
-.container{
-    width:80%;
-    margin:auto;
-    margin-top:20px;
-    background:white;
-    padding:30px;
-    border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.8;
+      cursor: none;
+    }
 
-.step{
-    margin-bottom:40px;
-}
+    /* Noise */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: 0.5;
+    }
 
-.step h2{
-    background:#3498db;
-    color:white;
-    padding:10px;
-    border-radius:5px;
-}
+    /* Grid */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none; z-index: 0;
+    }
 
-.box{
-    background:#ecf0f1;
-    padding:15px;
-    border-radius:5px;
-    margin-top:10px;
-}
+    /* ── Cursor ── */
+    #cursor {
+      position: fixed; width: 10px; height: 10px;
+      background: var(--accent); border-radius: 50%;
+      pointer-events: none; z-index: 9999;
+      mix-blend-mode: screen;
+      transition: transform 0.15s;
+    }
+    #cursor-trail {
+      position: fixed; width: 32px; height: 32px;
+      border: 1px solid rgba(0,229,255,0.3); border-radius: 50%;
+      pointer-events: none; z-index: 9998;
+      transition: left 0.1s ease, top 0.1s ease;
+      transform: translate(-50%, -50%);
+    }
 
-.code{
-    background:#2d3436;
-    color:#00ff88;
-    padding:15px;
-    border-radius:5px;
-    font-family: monospace;
-    white-space: pre-wrap;
-}
+    /* ── Sidebar TOC ── */
+    #toc {
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      width: 240px;
+      background: rgba(5,8,16,0.95);
+      border-right: 1px solid var(--border);
+      padding: 32px 0;
+      z-index: 100;
+      overflow-y: auto;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+    #toc.open { transform: translateX(0); }
+    #toc::-webkit-scrollbar { width: 4px; }
+    #toc::-webkit-scrollbar-thumb { background: var(--accent3); border-radius: 4px; }
 
-button{
-    background:#27ae60;
-    color:white;
-    border:none;
-    padding:10px 20px;
-    border-radius:5px;
-    cursor:pointer;
-}
+    .toc-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      padding: 0 20px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
 
-button:hover{
-    background:#219150;
-}
+    .toc-item {
+      display: block;
+      padding: 8px 20px;
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.2s;
+      line-height: 1.4;
+    }
+    .toc-item:hover, .toc-item.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      background: rgba(0,229,255,0.04);
+    }
 
-.footer{
-    text-align:center;
-    padding:20px;
-    margin-top:20px;
-    background:#2c3e50;
-    color:white;
-}
+    /* ── Top Bar ── */
+    #topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 56px;
+      background: rgba(5,8,16,0.9);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      display: flex; align-items: center;
+      padding: 0 24px;
+      z-index: 99;
+      gap: 16px;
+    }
 
-</style>
+    #menu-btn {
+      background: none; border: 1px solid var(--border);
+      color: var(--text); cursor: none;
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    #menu-btn:hover { border-color: var(--accent); background: rgba(0,229,255,0.06); }
 
+    .topbar-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .topbar-title span { color: var(--accent); }
+
+    .topbar-badge {
+      margin-left: auto;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(0,229,255,0.3);
+      padding: 4px 10px;
+      border-radius: 100px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .dot-pulse {
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+
+    /* ── Progress bar ── */
+    #progress {
+      position: fixed; top: 56px; left: 0; right: 0;
+      height: 2px; background: transparent; z-index: 98;
+    }
+    #progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.1s;
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      text-align: center;
+      padding: 80px 24px 40px;
+    }
+
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(90px); pointer-events: none;
+      animation: orbFloat 9s ease-in-out infinite;
+    }
+    .orb1 { width: 500px;height:500px;background:rgba(0,229,255,0.06);top:-150px;left:-100px; }
+    .orb2 { width:350px;height:350px;background:rgba(123,47,255,0.07);bottom:0;right:-80px;animation-delay:3s; }
+    .orb3 { width:200px;height:200px;background:rgba(255,60,172,0.06);top:40%;right:15%;animation-delay:1.5s; }
+    @keyframes orbFloat { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,-30px)} }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid rgba(0,229,255,0.25);
+      background: rgba(0,229,255,0.05);
+      padding: 6px 16px; border-radius: 100px;
+      font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 28px;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(44px, 7vw, 90px);
+      line-height: 0.95;
+      letter-spacing: -2px;
+      animation: fadeUp 0.8s 0.1s ease both;
+    }
+    .hero-title .t1 { display:block; color: var(--text); }
+    .hero-title .t2 {
+      display:block;
+      background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; background-size: 200%;
+      animation: fadeUp 0.8s 0.1s ease both, gradShift 4s ease infinite;
+    }
+    @keyframes gradShift { 0%,100%{background-position:0%} 50%{background-position:100%} }
+
+    .hero-sub {
+      margin-top: 24px; font-size: 12px;
+      color: var(--muted); letter-spacing: 1px;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+
+    .hero-meta {
+      margin-top: 40px;
+      display: flex; flex-wrap: wrap; gap: 12px;
+      justify-content: center;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+
+    .meta-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 11px;
+      color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .meta-chip .ic { color: var(--accent); }
+
+    .hero-btn {
+      margin-top: 32px;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(90deg, var(--accent3), var(--accent2));
+      color: white; text-decoration: none;
+      padding: 12px 28px; border-radius: 100px;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: fadeUp 0.8s 0.4s ease both;
+    }
+    .hero-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(123,47,255,0.4); }
+
+    /* ── MAIN CONTENT ── */
+    .content {
+      position: relative; z-index: 1;
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── SECTION HEADING ── */
+    .section-heading {
+      display: flex; align-items: center; gap: 16px;
+      margin: 72px 0 28px;
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .section-heading.visible { opacity: 1; transform: translateY(0); }
+
+    .section-num {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent3), var(--accent));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px;
+      color: white; flex-shrink: 0;
+      box-shadow: 0 4px 20px rgba(0,229,255,0.2);
+    }
+
+    .section-info h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: clamp(20px, 3vw, 26px);
+      color: var(--text); line-height: 1.1;
+    }
+    .section-info p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── PROSE ── */
+    .prose {
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .prose.visible { opacity: 1; transform: translateY(0); }
+
+    .prose p {
+      color: #a8b0c0;
+      font-size: 13px;
+      margin: 12px 0;
+      line-height: 1.9;
+    }
+
+    .prose h3 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: 15px;
+      color: var(--text);
+      margin: 32px 0 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .prose h3::before {
+      content: '';
+      display: inline-block;
+      width: 3px; height: 16px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .prose h4 {
+      font-size: 12px; font-weight: 500;
+      color: var(--accent2);
+      margin: 20px 0 8px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ── CODE BLOCK ── */
+    .code-wrap {
+      position: relative;
+      margin: 16px 0;
+    }
+
+    .code-header {
+      display: flex; align-items: center;
+      background: #111827;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 12px 12px 0 0;
+      padding: 10px 16px;
+      gap: 8px;
+    }
+
+    .cd { width: 10px; height: 10px; border-radius: 50%; }
+    .cd:nth-child(1) { background: #ff5f57; }
+    .cd:nth-child(2) { background: #febc2e; }
+    .cd:nth-child(3) { background: #28c840; }
+
+    .code-lang {
+      margin-left: auto;
+      font-size: 10px; color: var(--muted);
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+
+    .copy-btn {
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); cursor: none;
+      padding: 3px 10px; border-radius: 6px;
+      font-size: 10px; font-family: 'DM Mono', monospace;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+    pre {
+      background: #0a0c14;
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      padding: 20px;
+      overflow-x: auto;
+      font-size: 12.5px;
+      line-height: 1.8;
+      color: #c9d1d9;
+      transition: border-color 0.2s;
+    }
+    pre:hover { border-color: rgba(0,229,255,0.2); }
+    pre::-webkit-scrollbar { height: 4px; }
+    pre::-webkit-scrollbar-thumb { background: var(--accent3); border-radius: 4px; }
+
+    code {
+      font-family: 'DM Mono', monospace;
+      background: rgba(0,229,255,0.08);
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    pre code { background: none; color: inherit; padding: 0; border-radius: 0; }
+
+    /* ── NOTE / WARN ── */
+    .note, .warn {
+      border-radius: 14px;
+      padding: 18px 22px;
+      margin: 20px 0;
+      font-size: 12.5px;
+      line-height: 1.8;
+      position: relative;
+      overflow: hidden;
+    }
+    .note::before, .warn::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+    }
+
+    .note {
+      background: rgba(0,229,255,0.06);
+      border: 1px solid rgba(0,229,255,0.2);
+      color: #a8d8e0;
+    }
+    .note::before { background: var(--accent); }
+    .note .note-icon { color: var(--accent); font-weight: 700; }
+
+    .warn {
+      background: rgba(255,214,0,0.06);
+      border: 1px solid rgba(255,214,0,0.2);
+      color: #d4c97a;
+    }
+    .warn::before { background: var(--yellow); }
+    .warn b { color: var(--yellow); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 48px 0;
+    }
+
+    /* ── DONE BANNER ── */
+    .done-banner {
+      background: linear-gradient(135deg, rgba(0,230,118,0.08), rgba(0,229,255,0.05));
+      border: 1px solid rgba(0,230,118,0.25);
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      margin: 60px 0;
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .done-banner.visible { opacity: 1; transform: translateY(0); }
+    .done-banner .done-emoji { font-size: 48px; margin-bottom: 16px; }
+    .done-banner h2 {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: 28px; color: var(--green); margin-bottom: 8px;
+    }
+    .done-banner p { color: var(--muted); font-size: 13px; }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 40px 24px;
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      letter-spacing: 1px;
+    }
+    footer span { color: var(--accent); }
+
+    /* ── SCROLL TO TOP ── */
+    #scrolltop {
+      position: fixed; bottom: 28px; right: 24px;
+      width: 44px; height: 44px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; cursor: none; z-index: 100;
+      opacity: 0; transform: translateY(10px);
+      transition: all 0.3s;
+    }
+    #scrolltop.show { opacity: 1; transform: translateY(0); }
+    #scrolltop:hover { border-color: var(--accent); box-shadow: var(--glow); }
+
+    /* ── PARTICLES ── */
+    .particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .particle {
+      position: absolute; width: 2px; height: 2px;
+      background: var(--accent); border-radius: 50%;
+      animation: partFloat linear infinite; opacity: 0;
+    }
+    @keyframes partFloat {
+      0% { transform: translateY(100vh); opacity: 0; }
+      10% { opacity: 0.5; }
+      90% { opacity: 0.5; }
+      100% { transform: translateY(-10vh) translateX(40px); opacity: 0; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .hero-title { letter-spacing: -1px; }
+      .meta-chip { font-size: 10px; }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent3); border-radius: 4px; }
+
+    /* ── TECH STACK STRIP ── */
+    .tech-strip {
+      position: relative; z-index: 1;
+      padding: 0 24px 0;
+      max-width: 820px;
+      margin: 0 auto 16px;
+    }
+    .tech-strip-label {
+      font-size: 10px; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--muted);
+      text-align: center; margin-bottom: 20px;
+    }
+    .tech-cards {
+      display: flex; flex-wrap: wrap;
+      gap: 12px; justify-content: center;
+    }
+    .tech-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
+      min-width: 90px;
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      opacity: 0; transform: translateY(16px);
+      cursor: default;
+    }
+    .tech-card.visible { opacity: 1; transform: translateY(0); transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.3s, box-shadow 0.3s; }
+    .tech-card:hover { transform: translateY(-5px); box-shadow: 0 8px 28px rgba(0,229,255,0.12); border-color: rgba(0,229,255,0.3); }
+    .tech-card i { font-size: 32px; line-height: 1; }
+    .tech-card img { width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(255,255,255,0.1)); transition: filter 0.3s; }
+    .tech-card:hover img { filter: drop-shadow(0 0 10px rgba(0,229,255,0.4)); }
+    .tech-card span { font-size: 10px; color: var(--muted); letter-spacing: 0.5px; text-align: center; }
+
+    /* tech icon colors */
+    .ic-ubuntu { color: #E95420; }
+    .ic-apache { color: #D22128; }
+    .ic-bind   { color: #00e5ff; }
+    .ic-ssl    { color: #ffd600; }
+    .ic-zabbix { color: #d40000; }
+    .ic-mikrotik { color: #cf192b; }
+    .ic-mysql  { color: #4479A1; }
+    .ic-linux  { color: #FCC624; }
+
+    /* ── SECTION ICON ── */
+    .section-num i { font-size: 18px; }
+    .section-num img { width: 22px; height: 22px; object-fit: contain; filter: brightness(0) invert(1); }
+
+    /* ── TOC ICONS ── */
+    .toc-item img.toc-img { width: 14px; height: 14px; object-fit: contain; margin-right: 8px; opacity: 0.6; vertical-align: middle; transition: opacity 0.2s; }
+    .toc-item:hover img.toc-img, .toc-item.active img.toc-img { opacity: 1; filter: brightness(0) saturate(100%) invert(85%) sepia(79%) saturate(400%) hue-rotate(155deg); }
+  </style>
 </head>
-
 <body>
 
-<div class="header">
-<h1>Tutorial Membuat CBT Sekolah</h1>
-<p>Website CBT menggunakan GitHub</p>
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+<div class="particles" id="particles"></div>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <button id="menu-btn" title="Menu">☰</button>
+  <div class="topbar-title">Ubuntu <span>Server</span> Tutorial</div>
+  <div class="topbar-badge"><span class="dot-pulse"></span>Paket 1</div>
+</div>
+<div id="progress"><div id="progress-fill"></div></div>
+
+<!-- SIDEBAR TOC -->
+<nav id="toc">
+  <div class="toc-title">// navigasi</div>
+  <a class="toc-item" href="#ssh"><img src="https://cdn.simpleicons.org/openssh/5a6072" alt="" class="toc-img"/>1. SSH</a>
+  <a class="toc-item" href="#dns"><img src="https://cdn.simpleicons.org/isc/5a6072" alt="" class="toc-img"/>2. DNS (BIND9)</a>
+  <a class="toc-item" href="#apache"><img src="https://cdn.simpleicons.org/apache/5a6072" alt="" class="toc-img"/>3. Apache2</a>
+  <a class="toc-item" href="#https"><img src="https://cdn.simpleicons.org/letsencrypt/5a6072" alt="" class="toc-img"/>4. HTTPS SSL</a>
+  <a class="toc-item" href="#zabbix"><img src="https://cdn.simpleicons.org/zabbix/5a6072" alt="" class="toc-img"/>5. Zabbix</a>
+  <a class="toc-item" href="#firewall"><img src="https://cdn.simpleicons.org/mikrotik/5a6072" alt="" class="toc-img"/>6. Firewall MikroTik</a>
+  <a class="toc-item" href="#netplan"><img src="https://cdn.simpleicons.org/ubuntu/5a6072" alt="" class="toc-img"/>7. Netplan (Opsional)</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <div class="hero-eyebrow"><span class="dot-pulse"></span>Tutorial Ubuntu Server</div>
+  <h1 class="hero-title">
+    <span class="t1">Ubuntu</span>
+    <span class="t2">Server Paket 1</span>
+  </h1>
+  <p class="hero-sub">// Dibuat oleh Muzaki Setiawan</p>
+
+  <div class="hero-meta">
+    <div class="meta-chip"><span class="ic">🖥️</span> IP Server: <b>192.168.30.10</b></div>
+    <div class="meta-chip"><span class="ic">🐧</span> Ubuntu Server 24.04</div>
+    <div class="meta-chip"><span class="ic">⚡</span> VirtualBox / SSH</div>
+  </div>
+
+  <a href="paket2.html" class="hero-btn">Lanjut ke Paket 2 →</a>
 </div>
 
-<div class="container">
-
-<div class="step">
-
-<h2>STEP 1 — Buat Repository GitHub</h2>
-
-<div class="box">
-
-<p><b>1. Buka GitHub</b></p>
-
-<p>Masuk ke:</p>
-
-<button onclick="window.open('https://github.com')">
-Buka GitHub
-</button>
-
-<p>Login akun kamu</p>
-
-<p><b>2. Klik tombol:</b></p>
-
-<p>New repository</p>
-
-<p><b>3. Isi seperti ini:</b></p>
-
-<ul>
-
-<li>Nama repository: <b>cbt-sekolah</b></li>
-
-<li>Pilih: <b>Public</b></li>
-
-<li>Centang: <b>Add README</b></li>
-
-</ul>
-
-<p>Klik:</p>
-
-<b>Create repository</b>
-
+<!-- TECH STACK STRIP -->
+<div class="tech-strip">
+  <p class="tech-strip-label">// teknologi yang digunakan</p>
+  <div class="tech-cards">
+    <div class="tech-card" data-delay="0">
+      <img src="https://cdn.simpleicons.org/ubuntu/E95420" alt="Ubuntu"/>
+      <span>Ubuntu</span>
+    </div>
+    <div class="tech-card" data-delay="80">
+      <img src="https://cdn.simpleicons.org/apache/D22128" alt="Apache2"/>
+      <span>Apache2</span>
+    </div>
+    <div class="tech-card" data-delay="160">
+      <img src="https://cdn.simpleicons.org/isc/00e5ff" alt="BIND9"/>
+      <span>BIND9 DNS</span>
+    </div>
+    <div class="tech-card" data-delay="240">
+      <img src="https://cdn.simpleicons.org/letsencrypt/ffd600" alt="SSL"/>
+      <span>SSL/HTTPS</span>
+    </div>
+    <div class="tech-card" data-delay="320">
+      <img src="https://cdn.simpleicons.org/zabbix/D40000" alt="Zabbix"/>
+      <span>Zabbix</span>
+    </div>
+    <div class="tech-card" data-delay="400">
+      <img src="https://cdn.simpleicons.org/mikrotik/CF192B" alt="MikroTik"/>
+      <span>MikroTik</span>
+    </div>
+    <div class="tech-card" data-delay="480">
+      <img src="https://cdn.simpleicons.org/mariadb/C0765A" alt="MariaDB"/>
+      <span>MariaDB</span>
+    </div>
+    <div class="tech-card" data-delay="560">
+      <img src="https://cdn.simpleicons.org/linux/FCC624" alt="Linux"/>
+      <span>Linux</span>
+    </div>
+  </div>
 </div>
 
-</div>
+<!-- MAIN CONTENT -->
+<div class="content">
 
-<div class="step">
+  <!-- ========== SSH ========== -->
+  <div id="ssh" class="section-heading">
+    <div class="section-num" style="background:linear-gradient(135deg,#1a6e3a,#00e676)"><img src="https://cdn.simpleicons.org/openssh/ffffff" alt="SSH"/></div>
+    <div class="section-info">
+      <h2>Penginstalan SSH</h2>
+      <p>Remote access dari Windows ke server</p>
+    </div>
+  </div>
+  <div class="prose">
+    <p>SSH digunakan agar kita bisa mengontrol server dari Windows tanpa harus membuka VirtualBox.</p>
 
-<h2>STEP 2 — Upload File Website Pertama</h2>
+    <h3>Install SSH</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo apt update
+sudo apt install ssh -y</code></pre>
+    </div>
 
-<div class="box">
+    <h3>Cek Status SSH</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>systemctl status ssh</code></pre>
+    </div>
 
-<p>Klik:</p>
+    <p>Pastikan muncul:</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">output</span></div>
+      <pre><code>active (running)</code></pre>
+    </div>
 
-<b>Add file → Create new file</b>
+    <h3>Login dari Windows</h3>
+    <p>Buka <b>Command Prompt (CMD)</b> di Windows, lalu ketik:</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">cmd</span><button class="copy-btn">copy</button></div>
+      <pre><code>ssh username@192.168.30.10</code></pre>
+    </div>
 
-<p>Nama file:</p>
+    <div class="note"><span class="note-icon">ℹ️ INFO:</span> Jika muncul pertanyaan <b>password</b>, masukkan <u>password Ubuntu Server</u>, bukan password database.</div>
+  </div>
 
-<b>index.html</b>
+  <div class="divider"></div>
 
-<p>Isi:</p>
+  <!-- ========== DNS ========== -->
+  <div id="dns" class="section-heading">
+    <div class="section-num" style="background:linear-gradient(135deg,#005fa3,#00e5ff)"><img src="https://cdn.simpleicons.org/isc/ffffff" alt="BIND9"/></div>
+    <div class="section-info">
+      <h2>DNS Server (BIND9)</h2>
+      <p>Domain: lab-smk.xyz → 192.168.30.10</p>
+    </div>
+  </div>
+  <div class="prose">
+    <p>DNS berfungsi menerjemahkan nama domain menjadi IP. Di sini kita akan menggunakan domain lokal:</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">domain</span></div>
+      <pre><code>lab-smk.xyz</code></pre>
+    </div>
 
-<div class="code">
+    <h3>Install BIND9</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo apt install bind9 -y</code></pre>
+    </div>
 
-&lt;!DOCTYPE html&gt;
-&lt;html&gt;
+    <h3>Konfigurasi Zone</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo nano /etc/bind/named.conf.local</code></pre>
+    </div>
+    <p>Tambahkan:</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">config</span><button class="copy-btn">copy</button></div>
+      <pre><code>zone "lab-smk.xyz" {
+    type master;
+    file "/etc/bind/db.lab-smk";
+};</code></pre>
+    </div>
+
+    <h3>Buat File Zone</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo cp /etc/bind/db.local /etc/bind/db.lab-smk
+sudo nano /etc/bind/db.lab-smk</code></pre>
+    </div>
+    <p>Isi:</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">zone file</span><button class="copy-btn">copy</button></div>
+      <pre><code>$TTL 300
+@   IN  SOA lab-smk.xyz. root.lab-smk.xyz. (
+        2026012201
+        3600
+        900
+        604800
+        300 )
+
+@       IN  NS  ns.lab-smk.xyz.
+@       IN  A   192.168.30.10
+ns      IN  A   192.168.30.10
+www     IN  A   192.168.30.10
+monitor IN  A   192.168.30.10</code></pre>
+    </div>
+
+    <h3>Restart DNS</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo systemctl restart bind9</code></pre>
+    </div>
+
+    <h3>Pengetesan dari Windows</h3>
+    <p>Atur DNS Windows ke <b>192.168.30.10</b>, lalu:</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">cmd</span><button class="copy-btn">copy</button></div>
+      <pre><code>ping lab-smk.xyz
+ping www.lab-smk.xyz
+ping monitor.lab-smk.xyz</code></pre>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ========== APACHE ========== -->
+  <div id="apache" class="section-heading">
+    <div class="section-num" style="background:linear-gradient(135deg,#8b0000,#D22128)"><img src="https://cdn.simpleicons.org/apache/ffffff" alt="Apache2"/></div>
+    <div class="section-info">
+      <h2>Web Server Apache2</h2>
+      <p>Install & konfigurasi web server</p>
+    </div>
+  </div>
+  <div class="prose">
+    <h3>Install Apache</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo apt install apache2 -y</code></pre>
+    </div>
+
+    <h3>Edit Halaman Web</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo nano /var/www/html/index.html</code></pre>
+    </div>
+    <p>Isi pake ini 😁:</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">html</span><button class="copy-btn">copy</button></div>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="id"&gt;
 &lt;head&gt;
-&lt;title&gt;CBT Sekolah&lt;/title&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;Website Muzaki Setiawan&lt;/title&gt;
+  &lt;style&gt;
+    body {
+      margin: 0; height: 100vh;
+      display: flex; justify-content: center; align-items: center;
+      background: linear-gradient(135deg, #4b0f1b, #2a050a);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .box {
+      background: rgba(255,255,255,0.08);
+      padding: 40px 60px; border-radius: 10px;
+      text-align: center;
+    }
+    h1 { color: #ffd6dc; font-size: 26px; }
+    p { color: #e0b5bb; }
+  &lt;/style&gt;
 &lt;/head&gt;
-
 &lt;body&gt;
-
-&lt;h1&gt;CBT Online Sekolah&lt;/h1&gt;
-
-&lt;p&gt;Website latihan ulangan&lt;/p&gt;
-
-&lt;a href="login.html"&gt;Login&lt;/a&gt;
-
-&lt;br&gt;&lt;br&gt;
-
-&lt;a href="register.html"&gt;Register&lt;/a&gt;
-
+  &lt;div class="box"&gt;
+    &lt;h1&gt;Ini Website Muzaki Setiawan&lt;/h1&gt;
+    &lt;p&gt;Contoh halaman HTML server&lt;/p&gt;
+  &lt;/div&gt;
 &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </div>
 
-&lt;/html&gt;
+    <h3>Test di Browser</h3>
+    <p>Buka di Windows:</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">url</span></div>
+      <pre><code>http://lab-smk.xyz</code></pre>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ========== HTTPS ========== -->
+  <div id="https" class="section-heading">
+    <div class="section-num" style="background:linear-gradient(135deg,#7b5a00,#ffd600)"><img src="https://cdn.simpleicons.org/letsencrypt/ffffff" alt="SSL"/></div>
+    <div class="section-info">
+      <h2>HTTPS Self-Signed Certificate</h2>
+      <p>Enkripsi koneksi dengan SSL/TLS</p>
+    </div>
+  </div>
+  <div class="prose">
+    <p>Pada bagian ini kita akan mengaktifkan <b>HTTPS</b> agar website dapat diakses menggunakan <b>https://</b> dan koneksi menjadi terenkripsi.</p>
+    <div class="note"><span class="note-icon">🔒 INFO:</span> IP Address: <b>192.168.30.10</b> &nbsp;|&nbsp; Domain: <b>lab-smk.xyz</b></div>
+
+    <h3>1. Install OpenSSL</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo apt update
+sudo apt install openssl -y</code></pre>
+    </div>
+
+    <h3>2. Aktifkan Modul SSL Apache</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo a2enmod ssl</code></pre>
+    </div>
+
+    <h3>3. Buat Folder SSL</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo mkdir /etc/apache2/ssl</code></pre>
+    </div>
+
+    <h3>4. Buat Sertifikat SSL Self-Signed</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+-keyout /etc/apache2/ssl/apache.key \
+-out /etc/apache2/ssl/apache.crt</code></pre>
+    </div>
+    <p>Saat muncul pertanyaan, isi seperti berikut:</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">input</span><button class="copy-btn">copy</button></div>
+      <pre><code>Country Name : ID
+State        : Jawa Barat
+City         : Bandung
+Organization : SMK Insan Mandiri
+Unit         : TKJ
+Common Name  : lab-smk.xyz
+Email        : admin@lab-smk.xyz</code></pre>
+    </div>
+    <div class="warn"><b>⚠️ PENTING:</b> Bagian <b>Common Name</b> sangat penting. Isi dengan domain server: <b>lab-smk.xyz</b></div>
+
+    <h3>5. Konfigurasi HTTPS Apache</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo nano /etc/apache2/sites-available/ssl.conf</code></pre>
+    </div>
+    <p>Isi:</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">apache config</span><button class="copy-btn">copy</button></div>
+      <pre><code>&lt;VirtualHost *:443&gt;
+  ServerAdmin admin@lab-smk.xyz
+  DocumentRoot /var/www/html
+  SSLEngine on
+  SSLCertificateFile /etc/apache2/ssl/apache.crt
+  SSLCertificateKeyFile /etc/apache2/ssl/apache.key
+  &lt;Directory /var/www/html&gt;
+    AllowOverride All
+  &lt;/Directory&gt;
+&lt;/VirtualHost&gt;</code></pre>
+    </div>
+    <p>Save: <code>CTRL+O</code> → <code>ENTER</code> → <code>CTRL+X</code></p>
+
+    <h3>6. Aktifkan Site HTTPS</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo a2ensite ssl.conf</code></pre>
+    </div>
+
+    <h3>7. Redirect HTTP → HTTPS</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo nano /etc/apache2/sites-available/000-default.conf</code></pre>
+    </div>
+    <p>Ubah menjadi:</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">apache config</span><button class="copy-btn">copy</button></div>
+      <pre><code>&lt;VirtualHost *:80&gt;
+  ServerName lab-smk.xyz
+  Redirect / https://lab-smk.xyz/
+&lt;/VirtualHost&gt;</code></pre>
+    </div>
+
+    <h3>8. Restart Apache</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo systemctl restart apache2</code></pre>
+    </div>
+
+    <h3>9. Test di Browser</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">url</span></div>
+      <pre><code>https://lab-smk.xyz
+https://192.168.30.10</code></pre>
+    </div>
+    <div class="note"><span class="note-icon">ℹ️ INFO:</span> Jika muncul peringatan keamanan: klik <b>Advanced → Accept Risk → Continue</b></div>
+
+    <h3>10. Cek Status Apache</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo systemctl status apache2</code></pre>
+    </div>
+    <div class="warn"><b>⚠️ CATATAN:</b> Karena menggunakan <b>Self-Signed</b>, browser mungkin menampilkan peringatan. Ini normal dan bukan error.</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ========== ZABBIX ========== -->
+  <div id="zabbix" class="section-heading">
+    <div class="section-num" style="background:linear-gradient(135deg,#7a0000,#d40000)"><img src="https://cdn.simpleicons.org/zabbix/ffffff" alt="Zabbix"/></div>
+    <div class="section-info">
+      <h2>Zabbix Server</h2>
+      <p>Monitoring server — Versi aman & pasti jalan</p>
+    </div>
+  </div>
+  <div class="prose">
+    <div class="warn"><b>⚠️ CATATAN:</b> Bagian ini memakai cara manual schema database karena pada beberapa sistem folder sql bawaan Zabbix tidak tersedia.</div>
+
+    <h3>Update Sistem</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo apt update && sudo apt upgrade -y</code></pre>
+    </div>
+
+    <h3>Install MariaDB</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo apt install mariadb-server -y</code></pre>
+    </div>
+
+    <h3>Secure MariaDB</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo mysql_secure_installation</code></pre>
+    </div>
+    <p>Gunakan jawaban:</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">input</span></div>
+      <pre><code>Switch to unix_socket authentication → Y
+Set root password → N
+Remove anonymous users → Y
+Disallow root login remotely → Y
+Remove test database → Y
+Reload privilege tables → Y</code></pre>
+    </div>
+
+    <h3>Buat Database Zabbix</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo mysql</code></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">sql</span><button class="copy-btn">copy</button></div>
+      <pre><code>CREATE DATABASE zabbix CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+CREATE USER 'zabbix'@'localhost' IDENTIFIED BY '1';
+GRANT ALL PRIVILEGES ON zabbix.* TO 'zabbix'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;</code></pre>
+    </div>
+    <div class="note"><span class="note-icon">ℹ️ INFO:</span> Password database adalah <b>1</b>. Jangan memasukkan password Ubuntu saat diminta password MySQL.</div>
+
+    <h3>Install Repository Zabbix</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>wget https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_7.0+ubuntu24.04_all.deb
+sudo dpkg -i zabbix-release_latest_7.0+ubuntu24.04_all.deb
+sudo apt update</code></pre>
+    </div>
+
+    <h3>Install Zabbix</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo apt install zabbix-server-mysql zabbix-frontend-php zabbix-apache-conf zabbix-agent -y</code></pre>
+    </div>
+
+    <h3>Download Schema Manual</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>cd ~
+wget https://cdn.zabbix.com/zabbix/sources/stable/7.0/zabbix-7.0.0.tar.gz
+tar -xzf zabbix-7.0.0.tar.gz
+cd zabbix-7.0.0/database/mysql</code></pre>
+    </div>
+
+    <h3>Import Database (URUTAN WAJIB)</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>mysql -u zabbix -p zabbix < schema.sql
+mysql -u zabbix -p zabbix < images.sql
+mysql -u zabbix -p zabbix < data.sql</code></pre>
+    </div>
+    <p>Password: <code>1</code></p>
+
+    <h3>Konfigurasi Zabbix</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo nano /etc/zabbix/zabbix_server.conf</code></pre>
+    </div>
+    <p>Pastikan:</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">config</span><button class="copy-btn">copy</button></div>
+      <pre><code>DBName=zabbix
+DBUser=zabbix
+DBPassword=1</code></pre>
+    </div>
+
+    <h3>Restart Service</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo systemctl restart zabbix-server apache2 zabbix-agent
+sudo systemctl enable zabbix-server apache2 zabbix-agent</code></pre>
+    </div>
+
+    <h3>Akses Web Zabbix</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">url</span></div>
+      <pre><code>http://monitor.lab-smk.xyz/zabbix
+http://192.168.30.10/zabbix</code></pre>
+    </div>
+    <p>Login: <code>Admin</code> / <code>zabbix</code></p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ========== FIREWALL ========== -->
+  <div id="firewall" class="section-heading">
+    <div class="section-num" style="background:linear-gradient(135deg,#6a0010,#cf192b)"><img src="https://cdn.simpleicons.org/mikrotik/ffffff" alt="MikroTik"/></div>
+    <div class="section-info">
+      <h2>Firewall MikroTik</h2>
+      <p>Filter Rules sesuai soal</p>
+    </div>
+  </div>
+  <div class="prose">
+    <p>Pada bagian ini kita akan mengatur <b>Firewall Filter Rules</b> di MikroTik untuk mengamankan jaringan antar VLAN serta akses ke router.</p>
+    <div class="note"><span class="note-icon">ℹ️ INFO:</span> Masuk ke MikroTik melalui: <b>IP → Firewall → Filter Rules</b></div>
+
+    <h3>a. Blok Akses VLAN 20 ke VLAN 10</h3>
+    <p>Rule ini harus berada <b>DI ATAS rule allow</b> agar benar-benar bekerja.</p>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">mikrotik</span><button class="copy-btn">copy</button></div>
+      <pre><code>Chain        : forward
+Src. Address : 192.168.20.0/24
+Dst. Address : 192.168.10.0/24
+Action       : drop
+Comment      : BLOCK VLAN20 to VLAN10</code></pre>
+    </div>
+
+    <h3>b. Izinkan VLAN 30 ke VLAN 10</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">mikrotik</span><button class="copy-btn">copy</button></div>
+      <pre><code>Chain        : forward
+Src. Address : 192.168.30.0/24
+Dst. Address : 192.168.10.0/24
+Action       : accept
+Comment      : ALLOW VLAN30 to VLAN10</code></pre>
+    </div>
+    <div class="warn"><b>⚠️ PENTING:</b> Pastikan rule ini berada <b>DI ATAS rule DROP VLAN20</b>, karena MikroTik membaca firewall dari atas ke bawah.</div>
+
+    <h3>c. Pengamanan Brute-Force (SSH & Winbox)</h3>
+    <h4>Rule 1 — Deteksi</h4>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">mikrotik</span><button class="copy-btn">copy</button></div>
+      <pre><code>Chain              : input
+Protocol           : tcp
+Dst Port           : 22,8291
+Connection State   : new
+Action             : add-src-to-address-list
+Address List       : brute-force
+Address List Time  : 1d</code></pre>
+    </div>
+    <h4>Rule 2 — Blok</h4>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">mikrotik</span><button class="copy-btn">copy</button></div>
+      <pre><code>Chain            : input
+Src Address List : brute-force
+Action           : drop
+Comment          : BLOCK BRUTE FORCE</code></pre>
+    </div>
+    <div class="note"><span class="note-icon">ℹ️ INFO:</span> IP yang mencoba login berulang kali akan otomatis diblokir selama <b>1 hari</b>.</div>
+
+    <h3>d. Logging Aktivitas Router</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">mikrotik</span><button class="copy-btn">copy</button></div>
+      <pre><code>Chain      : input
+Action     : log
+Log Prefix : ROUTER-ACCESS</code></pre>
+    </div>
+    <div class="warn"><b>⚠️ CATATAN:</b> Jangan menambahkan terlalu banyak rule <b>log</b> karena dapat membuat router menjadi berat.</div>
+
+    <h3>e. Pembatasan Akses Router</h3>
+    <h4>Allow VLAN 10</h4>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">mikrotik</span><button class="copy-btn">copy</button></div>
+      <pre><code>Chain       : input
+Src Address : 192.168.10.0/24
+Protocol   : tcp
+Dst Port   : 22,8291
+Action     : accept</code></pre>
+    </div>
+    <h4>Allow VLAN 30</h4>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">mikrotik</span><button class="copy-btn">copy</button></div>
+      <pre><code>Chain       : input
+Src Address : 192.168.30.0/24
+Protocol   : tcp
+Dst Port   : 22,8291
+Action     : accept</code></pre>
+    </div>
+    <h4>Drop Selain Itu</h4>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">mikrotik</span><button class="copy-btn">copy</button></div>
+      <pre><code>Chain    : input
+Protocol : tcp
+Dst Port : 22,8291
+Action   : drop
+Comment  : DROP OTHER ACCESS</code></pre>
+    </div>
+    <div class="note"><span class="note-icon">ℹ️ INFO:</span> Hanya perangkat dari VLAN 10 dan VLAN 30 yang bisa mengakses router menggunakan SSH dan Winbox.</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ========== NETPLAN ========== -->
+  <div id="netplan" class="section-heading">
+    <div class="section-num" style="background:linear-gradient(135deg,#3b2fff,#7b2fff)"><img src="https://cdn.simpleicons.org/ubuntu/ffffff" alt="Netplan"/></div>
+    <div class="section-info">
+      <h2>Konfigurasi Netplan</h2>
+      <p>Opsional — Mengatur IP Address Ubuntu Server</p>
+    </div>
+  </div>
+  <div class="prose">
+    <p>Bagian ini bersifat <b>opsional</b>, digunakan untuk mengatur IP Address pada Ubuntu Server menggunakan <b>Netplan</b>.</p>
+    <div class="note"><span class="note-icon">ℹ️ INFO:</span> File konfigurasi Netplan biasanya berada di: <b>/etc/netplan/50-*.yaml</b></div>
+
+    <h3>1. Cek Nama Interface</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>ip a</code></pre>
+    </div>
+
+    <h3>2. DHCP → Static IP</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo nano /etc/netplan/50-cloud-init.yaml</code></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">yaml</span><button class="copy-btn">copy</button></div>
+      <pre><code>network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp0s3:
+      dhcp4: no
+      addresses:
+        - 192.168.30.10/24
+      gateway4: 192.168.30.1
+      nameservers:
+        addresses:
+          - 192.168.30.10
+          - 8.8.8.8</code></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo netplan apply</code></pre>
+    </div>
+    <div class="note"><span class="note-icon">ℹ️ INFO:</span> Jika koneksi terputus, buka kembali VirtualBox untuk memperbaiki konfigurasi.</div>
+
+    <h3>3. Static IP → DHCP</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">yaml</span><button class="copy-btn">copy</button></div>
+      <pre><code>network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp0s3:
+      dhcp4: yes</code></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>sudo netplan apply</code></pre>
+    </div>
+
+    <h3>4. Cek IP Address</h3>
+    <div class="code-wrap">
+      <div class="code-header"><div class="cd"></div><div class="cd"></div><div class="cd"></div><span class="code-lang">bash</span><button class="copy-btn">copy</button></div>
+      <pre><code>ip a</code></pre>
+    </div>
+  </div>
+
+  <!-- DONE BANNER -->
+  <div class="done-banner">
+    <div class="done-emoji">🎉</div>
+    <h2>SELESAI!</h2>
+    <p>Zabbix Server siap digunakan untuk monitoring.<br/>Tutorial Ubuntu Server Paket 1 selesai.</p>
+  </div>
 
 </div>
 
-<p>Klik:</p>
+<!-- SCROLL TO TOP -->
+<div id="scrolltop" title="Kembali ke atas">↑</div>
 
-<b>Commit changes</b>
+<!-- FOOTER -->
+<footer>
+  <p>Tutorial Ubuntu Server &nbsp;·&nbsp; Dibuat oleh <span>Muzaki Setiawan</span> &nbsp;·&nbsp; Dengan kasih sayang 😘</p>
+</footer>
 
-</div>
+<script>
+  // ── Cursor ──
+  const cursor = document.getElementById('cursor');
+  const trail = document.getElementById('cursor-trail');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX - 5 + 'px';
+    cursor.style.top = e.clientY - 5 + 'px';
+    trail.style.left = e.clientX + 'px';
+    trail.style.top = e.clientY + 'px';
+  });
+  document.addEventListener('mousedown', () => cursor.style.transform = 'scale(2.5)');
+  document.addEventListener('mouseup', () => cursor.style.transform = 'scale(1)');
 
-</div>
+  // ── Particles ──
+  const pc = document.getElementById('particles');
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (Math.random() * 14 + 10) + 's';
+    p.style.animationDelay = (Math.random() * 14) + 's';
+    pc.appendChild(p);
+  }
 
-</div>
+  // ── Progress bar ──
+  window.addEventListener('scroll', () => {
+    const total = document.body.scrollHeight - window.innerHeight;
+    const pct = (window.scrollY / total) * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
 
-<div class="footer">
+    // scroll to top btn
+    const st = document.getElementById('scrolltop');
+    if (window.scrollY > 400) st.classList.add('show');
+    else st.classList.remove('show');
+  });
 
-Copyright 2026 - CBT Sekolah
+  document.getElementById('scrolltop').addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
-</div>
+  // ── Sidebar TOC ──
+  const toc = document.getElementById('toc');
+  document.getElementById('menu-btn').addEventListener('click', () => {
+    toc.classList.toggle('open');
+  });
+  document.addEventListener('click', e => {
+    if (!toc.contains(e.target) && e.target.id !== 'menu-btn') {
+      toc.classList.remove('open');
+    }
+  });
 
+  // Active TOC item on scroll
+  const sections = document.querySelectorAll('[id]');
+  const tocLinks = document.querySelectorAll('.toc-item');
+  const obs2 = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector(`.toc-item[href="#${entry.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => obs2.observe(s));
+
+  // ── Scroll Reveal ──
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const delay = entry.target.getAttribute('data-delay') || 0;
+        setTimeout(() => entry.target.classList.add('visible'), +delay);
+        revealObs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.section-heading, .prose, .done-banner, .tech-card').forEach(el => revealObs.observe(el));
+
+  // ── Copy buttons ──
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.closest('.code-wrap').querySelector('pre code');
+      if (!code) return;
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        btn.textContent = 'copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+      });
+    });
+  });
+</script>
 </body>
 </html>
